@@ -1,0 +1,30 @@
+import graphene
+from graphene_django import DjangoObjectType
+
+from basic.schema import BasicQuery, UserNode, UploadTest, CreatePazireshMutation, \
+    EditPazireshMutation
+import graphql_jwt
+
+
+class ObtainJSONWebToken(graphql_jwt.JSONWebTokenMutation):
+    user = graphene.Field(UserNode)
+
+    @classmethod
+    def resolve(cls, root, info, **kwargs):
+        return cls(user=info.context.user)
+
+
+class Mutation(graphene.ObjectType):
+    token_auth = ObtainJSONWebToken.Field()
+    verify_token = graphql_jwt.Verify.Field()
+    refresh_token = graphql_jwt.Refresh.Field()
+    create_paziresh_mutation = CreatePazireshMutation.Field()
+    edit_paziresh_mutation = EditPazireshMutation.Field()
+    upload_test_mutation = UploadTest.Field()
+
+
+class Query(BasicQuery, graphene.ObjectType):
+    pass
+
+
+schema = graphene.Schema(query=Query, mutation=Mutation)
