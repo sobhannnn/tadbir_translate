@@ -1,0 +1,92 @@
+version: '3.7'
+
+services:
+    db:
+        image: postgres:12.0-alpine
+        container_name: db
+        volumes:
+            - postgres_data:/var/lib/postgresql/data/
+            - media_files:/home/app/web/mediafiles
+        env_file:
+            - ./db.env
+        ports:
+            - "5432:5432"
+        
+
+    # celery:
+    #     restart: always
+    #     build: 
+    #         context: .
+    #     container_name: celery
+    #     command: celery -A tadbir worker --loglevel=debug --concurrency=8
+    #     volumes:
+    #         - media_files:/home/app/web/mediafiles
+    #         - .:/home/app/web
+    #     env_file:
+    #         - ./db.env
+    #     environment: 
+    #         - POSTGRES_HOST=db
+    #     depends_on:
+    #         - redis
+
+    tadbir:
+        build: 
+            context: .
+        container_name: tadbir
+        command: >
+            sh -c "python manage.py runserver 0.0.0.0:8000"
+
+        ports:
+            - "8000:8000"
+        environment:
+            - REDIS_HOST=redis
+        depends_on:
+            - redis
+            - db
+        env_file:
+            - ./db.env
+        environment: 
+            - POSTGRES_HOST=db
+        volumes:
+            - static_volume:/home/app/web/staticfiles
+            - media_files:/home/app/web/mediafiles
+            - .:/home/app/web/
+            - /data/db.sqlite3:/home/app/web/db.sqlite3/
+            
+    # redis:
+    #     container_name: redis
+    #     image: redis:alpine
+    #     ports:
+    #         - "6379:6379"
+
+    nginx:
+        build: 
+            context: nginx/
+        container_name: nginx
+        restart: always
+        volumes:
+            - static_volume:/home/app/web/staticfiles
+            - media_files:/home/app/web/mediafiles
+            - ./nginx/nginx.conf:/etc/nginx/conf.d/nginx.conf
+            - ./data/certbot/conf:/etc/letsencrypt
+            - ./data/certbot/www:/var/www/certbot
+        ports:
+            - 80:80
+            - 443:443
+        env_file:
+            - ./db.env
+        depends_on:
+            - tadbir
+
+    certbot:
+        image: certbot/certbot
+        volumes:
+            - ./data/certbot/conf:/etc/letsencrypt
+            - ./data/certbot/www:/var/www/certbot
+            - media_files:/home/app/web/mediafiles
+
+
+volumes:
+    static_volume:
+    postgres_data:
+    media_files:
