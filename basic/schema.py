@@ -123,6 +123,7 @@ class BimeShavandeGharardadHazineNode(DjangoObjectType):
         filter_fields = ['id']
         interfaces = (relay.Node,)
 
+
 class PazireshFilter(django_filters.FilterSet):
     class Meta:
         model = Paziresh
@@ -137,6 +138,7 @@ class PazireshFilter(django_filters.FilterSet):
                     return super(PazireshFilter, self).qs.filter(
                         bimeshavande_gharardad_hazine__bimeshavande_gharardad__gharardad__bimegozar=self.request.user.bimegozar)
         return super(PazireshFilter, self).qs
+
 
 class PazireshNode(DjangoObjectType):
     class Meta:
@@ -257,7 +259,7 @@ class EditPazireshMutation(graphene.Mutation):
 
     @classmethod
     def mutate(cls, root, info, status, id, hazine_darkhasti, hazine, hazine_taeidi, bime_paye, arzyab_message,
-               profile_type, profile_id,eslah, **kwargs):
+               profile_type, profile_id, eslah, **kwargs):
         paziresh = Paziresh.objects.get(pk=from_global_id(id)[1])
         if not paziresh.bimeshavande_gharardad_hazine.hazine.id == from_global_id(hazine)[1]:
             paziresh.bimeshavande_gharardad_hazine.hazine.id = from_global_id(hazine)[1]
@@ -292,6 +294,23 @@ class EditPazireshMutation(graphene.Mutation):
             paziresh.status = 'waitforkarshenas'
             paziresh.save()
         return EditPazireshMutation(success=True, paziresh=paziresh)
+
+
+class ChangePasswordMutation(graphene.Mutation):
+    class Arguments:
+        current_password = graphene.String()
+        new_password = graphene.String()
+
+    status = graphene.Boolean()
+
+    @classmethod
+    def mutate(cls, root, info, current_password, new_password):
+        user = info.context.user
+        status = user.check_password(current_password)
+        if status:
+            user.set_password(new_password)
+            user.save()
+        return ChangePasswordMutation(status=status)
 
 
 class UploadTest(graphene.Mutation):

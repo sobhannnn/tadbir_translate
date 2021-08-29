@@ -34,13 +34,14 @@ class Role(models.Model):
     )
     id = models.PositiveSmallIntegerField(choices=ROLE_CHOICES, primary_key=True)
     name = models.CharField(choices=ROLE_NAMES, default='bimeshavande', max_length=20)
+
     def __str__(self):
         return self.get_id_display()
 
 
 class User(AbstractUser):
     melli_code = models.CharField(max_length=100, blank=True, null=True)
-    code = models.IntegerField(max_length=100, blank=True, null=True)
+    code = models.IntegerField(blank=True, null=True)
     phone_number = models.CharField(max_length=100, blank=True, null=True)
     age = models.IntegerField(default=25, blank=True, null=True)
     roles = models.ManyToManyField(Role)
@@ -95,6 +96,7 @@ class HazineGharardad(models.Model):
     gharardad = models.ForeignKey(Gharardad, on_delete=models.CASCADE)
     hazine = models.ForeignKey(Hazine, on_delete=models.CASCADE)
     saghf = models.BigIntegerField()
+    madarek = models.TextField(max_length=5000, blank=True, null=True)
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -124,12 +126,14 @@ def bime_shavande_gharardad_handler(sender, instance, created, **kwargs):
                 BimeShavandeGharardadHazine.objects.create(bimeshavande_gharardad=instance, hazine=hazine,
                                                            personal_saghf=gharardad_hazine.saghf)
 
+
 @receiver(post_save, sender=HazineGharardad)
 def hazine_gharardad_handler(sender, instance, created, **kwargs):
     hazine_gharardads = BimeShavandeGharardadHazine.objects.filter(hazine=instance.hazine).all()
     for hazine_gharardad in hazine_gharardads:
         hazine_gharardad.personal_saghf = instance.saghf
         hazine_gharardad.save()
+
 
 class Paziresh(models.Model):
     bimeshavande_gharardad_hazine = models.ForeignKey(BimeShavandeGharardadHazine, on_delete=models.CASCADE)
