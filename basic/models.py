@@ -44,6 +44,7 @@ class User(AbstractUser):
     code = models.IntegerField(blank=True, null=True)
     phone_number = models.CharField(max_length=100, blank=True, null=True)
     age = models.IntegerField(default=25, blank=True, null=True)
+    is_asli = models.BooleanField(default=False)
     roles = models.ManyToManyField(Role)
 
 
@@ -76,6 +77,7 @@ class Hazine(models.Model):
     name = models.CharField(max_length=100)
     code = models.IntegerField(blank=True, null=True)
     category = models.ForeignKey(HazineCategory, on_delete=models.CASCADE)
+    madarek = models.TextField(blank=True, null=True)
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
 

@@ -275,13 +275,13 @@ class EditPazireshMutation(graphene.Mutation):
                 last_status = paziresh.status
                 paziresh.status = "accepted"
                 paziresh.arzyab = User.objects.get(pk=from_global_id(profile_id)[1])
-                if last_status != "accepted":
+                if last_status != "accepted" and paziresh.bimeshavande_gharardad_hazine.personal_saghf > -1:
                     paziresh.bimeshavande_gharardad_hazine.personal_saghf = paziresh.bimeshavande_gharardad_hazine.personal_saghf - hazine_taeidi
                     paziresh.bimeshavande_gharardad_hazine.save()
         else:
             last_status = paziresh.status
             paziresh.status = 'rejected'
-            if last_status == 'accepted':
+            if last_status == 'accepted' and paziresh.bimeshavande_gharardad_hazine.personal_saghf > -1:
                 paziresh.bimeshavande_gharardad_hazine.personal_saghf = paziresh.bimeshavande_gharardad_hazine.personal_saghf + hazine_taeidi
                 paziresh.bimeshavande_gharardad_hazine.save()
             paziresh.arzyab_message = arzyab_message
