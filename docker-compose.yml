@@ -13,21 +13,21 @@ services:
             - "5432:5432"
         
 
-     celery:
-         restart: always
-         build:
-             context: .
-         container_name: celery
-         command: celery -A tadbir worker --loglevel=debug --concurrency=8
-         volumes:
-             - media_files:/home/app/web/mediafiles
-             - .:/home/app/web
-         env_file:
-             - ./db.env
-         environment:
-             - POSTGRES_HOST=db
-         depends_on:
-             - redis
+    celery:
+        restart: always
+        build:
+            context: .
+        container_name: celery
+        command: celery -A tadbir worker --loglevel=debug --concurrency=8
+        volumes:
+            - media_files:/home/app/web/mediafiles
+            - .:/home/app/web
+        env_file:
+            - ./db.env
+        environment:
+            - POSTGRES_HOST=db
+        depends_on:
+            - redis
 
     tadbir:
         build: 
@@ -53,11 +53,11 @@ services:
             - .:/home/app/web/
             - /data/db.sqlite3:/home/app/web/db.sqlite3/
             
-     redis:
-         container_name: redis
-         image: redis:alpine
-         ports:
-             - "6379:6379"
+    redis:
+        container_name: redis
+        image: redis:alpine
+        ports:
+            - "6379:6379"
 
     nginx:
         build: 
