@@ -14,8 +14,8 @@ class Command(BaseCommand):
         BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent
         data1 = json.load(codecs.open(BASE_DIR / 'media/data.json', 'r', 'utf-8-sig'))
         data2 = json.dumps(data1)
-        print(data1["NewDataSet"][0])
         for json_user in data1["NewDataSet"]:
+            print(json_user["melli_code"])
             user = User.objects.create_user(json_user["melli_code"], '', json_user["melli_code"][-6:])
             user.melli_code = json_user["melli_code"]
             user.first_name = json_user["fisrt_name"]
