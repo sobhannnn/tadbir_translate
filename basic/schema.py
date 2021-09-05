@@ -127,7 +127,8 @@ class BimeShavandeGharardadHazineNode(DjangoObjectType):
 class PazireshFilter(django_filters.FilterSet):
     class Meta:
         model = Paziresh
-        fields = {'id': ['exact'], 'date': ['exact'], 'status': ['exact', 'in']}
+        fields = {'id': ['exact'], 'date': [
+            'exact'], 'status': ['exact', 'in']}
 
     @property
     def qs(self):
@@ -187,10 +188,13 @@ class BasicQuery(graphene.ObjectType):
     all_hazinegharardads = DjangoFilterConnectionField(HazineGharardadNode)
 
     bimeshavanadegharardad = relay.Node.Field(BimeShavanadeGharardadNode)
-    all_bimeshavandegharardads = DjangoFilterConnectionField(BimeShavanadeGharardadNode)
+    all_bimeshavandegharardads = DjangoFilterConnectionField(
+        BimeShavanadeGharardadNode)
 
-    bimeshavandegharardadhazine = relay.Node.Field(BimeShavandeGharardadHazineNode)
-    all_bimeshavandegharardadhazines = DjangoFilterConnectionField(BimeShavandeGharardadHazineNode)
+    bimeshavandegharardadhazine = relay.Node.Field(
+        BimeShavandeGharardadHazineNode)
+    all_bimeshavandegharardadhazines = DjangoFilterConnectionField(
+        BimeShavandeGharardadHazineNode)
 
     paziresh = relay.Node.Field(PazireshNode)
     all_pazireshes = DjangoFilterConnectionField(PazireshNode)
@@ -205,7 +209,7 @@ class BasicQuery(graphene.ObjectType):
     all_roles = DjangoFilterConnectionField(RoleNode)
 
 
-######MUTATIONS
+# MUTATIONS
 class CreatePazireshMutation(graphene.Mutation):
     class Arguments:
         files = Upload()
@@ -224,8 +228,10 @@ class CreatePazireshMutation(graphene.Mutation):
     def mutate(cls, root, info, files, bime_shavande, hazine, gharardad, date, hazine_darkhasti,
                shomare_nezam_pezeshki='',
                markaz_darmani='', **kwargs):
-        bime_shavande_object = User.objects.get(pk=from_global_id(bime_shavande)[1])
-        gharardad_object = Gharardad.objects.get(pk=from_global_id(gharardad)[1])
+        bime_shavande_object = User.objects.get(
+            pk=from_global_id(bime_shavande)[1])
+        gharardad_object = Gharardad.objects.get(
+            pk=from_global_id(gharardad)[1])
         hazine_object = Hazine.objects.get(pk=from_global_id(hazine)[1])
         bime_shavande_gharardad = BimeShavandeGharardadHazine.objects.filter(
             bimeshavande_gharardad__bimeshavande=bime_shavande_object,
@@ -262,7 +268,8 @@ class EditPazireshMutation(graphene.Mutation):
                profile_type, profile_id, eslah, **kwargs):
         paziresh = Paziresh.objects.get(pk=from_global_id(id)[1])
         if not paziresh.bimeshavande_gharardad_hazine.hazine.id == from_global_id(hazine)[1]:
-            paziresh.bimeshavande_gharardad_hazine.hazine.id = from_global_id(hazine)[1]
+            paziresh.bimeshavande_gharardad_hazine.hazine.id = from_global_id(hazine)[
+                1]
         if status:
             paziresh.hazine_darkhasti = hazine_darkhasti
             paziresh.hazine_taeidi = hazine_taeidi
@@ -270,11 +277,13 @@ class EditPazireshMutation(graphene.Mutation):
             paziresh.arzyab_message = arzyab_message
             if profile_type == "karshenas":
                 paziresh.status = "waitforarzyab"
-                paziresh.karshenas = User.objects.get(pk=from_global_id(profile_id)[1])
+                paziresh.karshenas = User.objects.get(
+                    pk=from_global_id(profile_id)[1])
             else:
                 last_status = paziresh.status
                 paziresh.status = "accepted"
-                paziresh.arzyab = User.objects.get(pk=from_global_id(profile_id)[1])
+                paziresh.arzyab = User.objects.get(
+                    pk=from_global_id(profile_id)[1])
                 if last_status != "accepted" and paziresh.bimeshavande_gharardad_hazine.personal_saghf > -1:
                     paziresh.bimeshavande_gharardad_hazine.personal_saghf = paziresh.bimeshavande_gharardad_hazine.personal_saghf - hazine_taeidi
                     paziresh.bimeshavande_gharardad_hazine.save()
@@ -286,14 +295,29 @@ class EditPazireshMutation(graphene.Mutation):
                 paziresh.bimeshavande_gharardad_hazine.save()
             paziresh.arzyab_message = arzyab_message
             if profile_type == "karshenas":
-                paziresh.karshenas = User.objects.get(pk=from_global_id(profile_id)[1])
+                paziresh.karshenas = User.objects.get(
+                    pk=from_global_id(profile_id)[1])
             else:
-                paziresh.arzyab = User.objects.get(pk=from_global_id(profile_id)[1])
+                paziresh.arzyab = User.objects.get(
+                    pk=from_global_id(profile_id)[1])
         paziresh.save()
         if eslah:
             paziresh.status = 'waitforkarshenas'
             paziresh.save()
         return EditPazireshMutation(success=True, paziresh=paziresh)
+
+
+class DeletePazireshMutation(graphene.Mutation):
+    class Arguments:
+        id = graphene.ID()
+
+    success = graphene.Boolean()
+
+    @classmethod
+    def mutate(cls, root, info, id, **kwargs):
+        paziresh = Paziresh.objects.get(pk=from_global_id(id)[1])
+        paziresh.delete()
+        return DeletePazireshMutation(success=True)
 
 
 class ChangePasswordMutation(graphene.Mutation):

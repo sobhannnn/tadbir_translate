@@ -1,7 +1,7 @@
 import graphene
 from graphene_django import DjangoObjectType
 
-from basic.schema import BasicQuery, UserNode, UploadTest, CreatePazireshMutation, \
+from basic.schema import BasicQuery, DeletePazireshMutation, UserNode, UploadTest, CreatePazireshMutation, \
     EditPazireshMutation, ChangePasswordMutation
 import graphql_jwt
 
@@ -22,6 +22,7 @@ class Mutation(graphene.ObjectType):
     edit_paziresh_mutation = EditPazireshMutation.Field()
     change_password_mutation = ChangePasswordMutation.Field()
     upload_test_mutation = UploadTest.Field()
+    delete_paziresh_mutation = DeletePazireshMutation.Field()
 
 
 class Query(BasicQuery, graphene.ObjectType):
