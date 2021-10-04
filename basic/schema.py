@@ -223,7 +223,7 @@ class CreatePazireshMutation(graphene.Mutation):
 
     success = graphene.Boolean()
     paziresh = graphene.Field(PazireshNode)
-
+    error = graphene.String()
     @classmethod
     def mutate(cls, root, info, files, bime_shavande, hazine, gharardad, date, hazine_darkhasti,
                shomare_nezam_pezeshki='',
@@ -236,15 +236,26 @@ class CreatePazireshMutation(graphene.Mutation):
         bime_shavande_gharardad = BimeShavandeGharardadHazine.objects.filter(
             bimeshavande_gharardad__bimeshavande=bime_shavande_object,
             bimeshavande_gharardad__gharardad=gharardad_object, hazine=hazine_object).first()
-        paziresh = Paziresh.objects.create(bimeshavande_gharardad_hazine=bime_shavande_gharardad,
-                                           date=date,
-                                           hazine_darkhasti=hazine_darkhasti,
-                                           shomare_nezam_pezeshki=shomare_nezam_pezeshki,
-                                           markaz_darmani=markaz_darmani)
-        for file in files:
-            PazireshFile.objects.create(file=file, paziresh=paziresh)
+        # try to create a paziresh and catch errors in a message
+        try:
+            paziresh = Paziresh.objects.create(
+                bimeshavande_gharardad_hazine=bime_shavande_gharardad,
+                date=date,
+                hazine_darkhasti=hazine_darkhasti,
+                shomare_nezam_pezeshki=shomare_nezam_pezeshki,
+                markaz_darmani=markaz_darmani)
+            # if there is a file, save it
+            if files:
+                for file in files:
+                    PazireshFile.objects.create(
+                        paziresh=paziresh, file=file)
+            success = True
+        except Exception as e:
+            success = False
+            paziresh = None
+            error = str(e)
         paziresh.create_file()
-        return CreatePazireshMutation(success=True, paziresh=paziresh)
+        return CreatePazireshMutation(success=success, paziresh=paziresh, error=error)
 
 
 class EditPazireshMutation(graphene.Mutation):
