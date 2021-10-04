@@ -15,7 +15,7 @@ services:
 
     celery:
         restart: always
-        build:
+        build: 
             context: .
         container_name: celery
         command: celery -A tadbir worker --loglevel=debug --concurrency=8
@@ -24,7 +24,7 @@ services:
             - .:/home/app/web
         env_file:
             - ./db.env
-        environment:
+        environment: 
             - POSTGRES_HOST=db
         depends_on:
             - redis
@@ -54,8 +54,9 @@ services:
             - /data/db.sqlite3:/home/app/web/db.sqlite3/
             
     redis:
+        build:
+            context: ./redis/
         container_name: redis
-        image: redis:alpine
         ports:
             - "6379:6379"
 

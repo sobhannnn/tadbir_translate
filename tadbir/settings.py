@@ -186,3 +186,6 @@ CELERY_BROKER_URL = 'redis://' + REDIS_HOST + ':' + REDIS_PORT + '/0'
 # letsencrypt
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
+
+# file upload
+FILE_UPLOAD_MAX_MEMORY_SIZE = None
