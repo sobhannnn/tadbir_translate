@@ -224,6 +224,7 @@ class CreatePazireshMutation(graphene.Mutation):
     success = graphene.Boolean()
     paziresh = graphene.Field(PazireshNode)
     error = graphene.String()
+
     @classmethod
     def mutate(cls, root, info, files, bime_shavande, hazine, gharardad, date, hazine_darkhasti,
                shomare_nezam_pezeshki='',
@@ -250,6 +251,7 @@ class CreatePazireshMutation(graphene.Mutation):
                     PazireshFile.objects.create(
                         paziresh=paziresh, file=file)
             success = True
+            error = ''
         except Exception as e:
             success = False
             paziresh = None
