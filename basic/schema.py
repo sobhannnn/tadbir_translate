@@ -48,10 +48,10 @@ class UserFilter(django_filters.FilterSet):
             print(self.request.user.id)
             roles = self.request.user.roles.all()
             for role in roles:
-                if role.name == 'bimegozar':
-                    print(self.request.user.bimegozar)
+                if role.name == 'policyholder':
+                    print(self.request.user.policy_holder)
                     return super(UserFilter, self).qs.filter(
-                        bimeshavanadegharardad__gharardad__bimegozar=self.request.user.bimegozar)
+                        insuredcontract__contract__policyholder=self.request.user.policy_holder)
         return super(UserFilter, self).qs
 
 
@@ -62,37 +62,37 @@ class UserNode(DjangoObjectType):
         interfaces = (relay.Node,)
 
 
-class BimeGozarNode(DjangoObjectType):
+class PolicyHolderNode(DjangoObjectType):
     class Meta:
-        model = BimeGozar
+        model = PolicyHolder
         filter_fields = ['id', 'name', 'code']
         interfaces = (relay.Node,)
 
 
-class BimeGarNode(DjangoObjectType):
+class InsurerNode(DjangoObjectType):
     class Meta:
-        model = BimeGar
+        model = Insurer
         filter_fields = ['id', 'name', 'code']
         interfaces = (relay.Node,)
 
 
-class HazineCategoryNode(DjangoObjectType):
+class CostCategoryNode(DjangoObjectType):
     class Meta:
-        model = HazineCategory
+        model = CostCategory
         filter_fields = ['id', 'name', 'code']
         interfaces = (relay.Node,)
 
 
-class HazineNode(DjangoObjectType):
+class CostNode(DjangoObjectType):
     class Meta:
-        model = Hazine
+        model = Cost
         filter_fields = ['id', 'name', 'code']
         interfaces = (relay.Node,)
 
 
-class GharardadNode(DjangoObjectType):
+class ContractNode(DjangoObjectType):
     class Meta:
-        model = Gharardad
+        model = Contract
         filter_fields = ['id', 'name', 'code', 'expire_date']
         interfaces = (relay.Node,)
 
@@ -103,30 +103,30 @@ class GharardadNode(DjangoObjectType):
         return self.file
 
 
-class HazineGharardadNode(DjangoObjectType):
+class ContractCostNode(DjangoObjectType):
     class Meta:
-        model = HazineGharardad
+        model = ContractCost
         filter_fields = ['id']
         interfaces = (relay.Node,)
 
 
-class BimeShavanadeGharardadNode(DjangoObjectType):
+class InsuredContractNode(DjangoObjectType):
     class Meta:
-        model = BimeShavanadeGharardad
+        model = InsuredContract
         filter_fields = ['id']
         interfaces = (relay.Node,)
 
 
-class BimeShavandeGharardadHazineNode(DjangoObjectType):
+class TheCostOfInsuredContractNode(DjangoObjectType):
     class Meta:
-        model = BimeShavandeGharardadHazine
+        model = TheCostOfInsuredContract
         filter_fields = ['id']
         interfaces = (relay.Node,)
 
 
-class PazireshFilter(django_filters.FilterSet):
+class ReceptionFilter(django_filters.FilterSet):
     class Meta:
-        model = Paziresh
+        model = Reception
         fields = {'id': ['exact'], 'date': [
             'exact'], 'status': ['exact', 'in']}
 
@@ -135,16 +135,16 @@ class PazireshFilter(django_filters.FilterSet):
         if self.request.user:
             roles = self.request.user.roles.all()
             for role in roles:
-                if role.name == 'bimegozar':
-                    return super(PazireshFilter, self).qs.filter(
-                        bimeshavande_gharardad_hazine__bimeshavande_gharardad__gharardad__bimegozar=self.request.user.bimegozar)
-        return super(PazireshFilter, self).qs
+                if role.name == 'policyholder':
+                    return super(ReceptionFilter, self).qs.filter(
+                        TheCostOfInsuredContract__insured_contract__contract__policy_holder=self.request.user.policy_holder)
+        return super(ReceptionFilter, self).qs
 
 
-class PazireshNode(DjangoObjectType):
+class ReceptionNode(DjangoObjectType):
     class Meta:
-        model = Paziresh
-        filterset_class = PazireshFilter
+        model = Reception
+        filterset_class = ReceptionFilter
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
@@ -155,9 +155,9 @@ class PazireshNode(DjangoObjectType):
         return self.file
 
 
-class PazireshFileNode(DjangoObjectType):
+class ReceptionFileNode(DjangoObjectType):
     class Meta:
-        model = PazireshFile
+        model = ReceptionFile
         filter_fields = ['id']
         interfaces = (relay.Node,)
 
@@ -169,38 +169,38 @@ class PazireshFileNode(DjangoObjectType):
 
 
 class BasicQuery(graphene.ObjectType):
-    bimegozar = relay.Node.Field(BimeGozarNode)
-    all_bimegozars = DjangoFilterConnectionField(BimeGozarNode)
+    policy_holder = relay.Node.Field(PolicyHolderNode)
+    all_policy_holders = DjangoFilterConnectionField(PolicyHolderNode)
 
-    bimegar = relay.Node.Field(BimeGarNode)
-    all_bimegars = DjangoFilterConnectionField(BimeGarNode)
+    insurer = relay.Node.Field(InsurerNode)
+    all_insurers = DjangoFilterConnectionField(InsurerNode)
 
-    hazinecategory = relay.Node.Field(HazineCategoryNode)
-    all_hazinecategories = DjangoFilterConnectionField(HazineCategoryNode)
+    cost_category = relay.Node.Field(CostCategoryNode)
+    all_cost_categories = DjangoFilterConnectionField(CostCategoryNode)
 
-    hazine = relay.Node.Field(HazineNode)
-    all_hazines = DjangoFilterConnectionField(HazineNode)
+    cost = relay.Node.Field(CostNode)
+    all_costs = DjangoFilterConnectionField(CostNode)
 
-    gharardad = relay.Node.Field(GharardadNode)
-    all_gharardads = DjangoFilterConnectionField(GharardadNode)
+    contract = relay.Node.Field(ContractNode)
+    all_contracts = DjangoFilterConnectionField(ContractNode)
 
-    hazinegharardad = relay.Node.Field(HazineGharardadNode)
-    all_hazinegharardads = DjangoFilterConnectionField(HazineGharardadNode)
+    contract_cost = relay.Node.Field(ContractCostNode)
+    all_contracts_costs = DjangoFilterConnectionField(ContractCostNode)
 
-    bimeshavanadegharardad = relay.Node.Field(BimeShavanadeGharardadNode)
-    all_bimeshavandegharardads = DjangoFilterConnectionField(
-        BimeShavanadeGharardadNode)
+    insured_contract = relay.Node.Field(InsuredContractNode)
+    all_insured_contracts = DjangoFilterConnectionField(
+        InsuredContractNode)
 
-    bimeshavandegharardadhazine = relay.Node.Field(
-        BimeShavandeGharardadHazineNode)
-    all_bimeshavandegharardadhazines = DjangoFilterConnectionField(
-        BimeShavandeGharardadHazineNode)
+    the_cost_of_insured_contract = relay.Node.Field(
+        TheCostOfInsuredContractNode)
+    all_the_cost_of_insured_contracts = DjangoFilterConnectionField(
+        TheCostOfInsuredContractNode)
 
-    paziresh = relay.Node.Field(PazireshNode)
-    all_pazireshes = DjangoFilterConnectionField(PazireshNode)
+    reception = relay.Node.Field(ReceptionNode)
+    all_receptions = DjangoFilterConnectionField(ReceptionNode)
 
-    pazireshfile = relay.Node.Field(PazireshFileNode)
-    all_pazireshfiles = DjangoFilterConnectionField(PazireshFileNode)
+    reception_file = relay.Node.Field(ReceptionFileNode)
+    all_receprion_files = DjangoFilterConnectionField(ReceptionFileNode)
 
     user = relay.Node.Field(UserNode)
     all_users = DjangoFilterConnectionField(UserNode)
@@ -210,117 +210,117 @@ class BasicQuery(graphene.ObjectType):
 
 
 # MUTATIONS
-class CreatePazireshMutation(graphene.Mutation):
+class CreateReceptionMutation(graphene.Mutation):
     class Arguments:
         files = Upload()
-        bime_shavande = graphene.ID()
-        hazine = graphene.ID()
-        gharardad = graphene.ID()
+        insured = graphene.ID()  # bime shavande
+        cost = graphene.ID()   # hazine
+        contract = graphene.ID()   # gharardad
         date = graphene.String()
-        hazine_darkhasti = graphene.Int()
+        requested_cost = graphene.Int()   # hazine darkhasty
         shomare_nezam_pezeshki = graphene.String()
         markaz_darmani = graphene.String()
 
     success = graphene.Boolean()
-    paziresh = graphene.Field(PazireshNode)
+    reception = graphene.Field(ReceptionNode)
     error = graphene.String()
 
     @classmethod
-    def mutate(cls, root, info, files, bime_shavande, hazine, gharardad, date, hazine_darkhasti,
+    def mutate(cls, root, info, files, insured, cost, contract, date, requested_cost,
                shomare_nezam_pezeshki='',
                markaz_darmani='', **kwargs):
-        bime_shavande_object = User.objects.get(
-            pk=from_global_id(bime_shavande)[1])
-        gharardad_object = Gharardad.objects.get(
-            pk=from_global_id(gharardad)[1])
-        hazine_object = Hazine.objects.get(pk=from_global_id(hazine)[1])
-        bime_shavande_gharardad = BimeShavandeGharardadHazine.objects.filter(
-            bimeshavande_gharardad__bimeshavande=bime_shavande_object,
-            bimeshavande_gharardad__gharardad=gharardad_object, hazine=hazine_object).first()
+        insured_object = User.objects.get(
+            pk=from_global_id(insured)[1])
+        contract_object = Contract.objects.get(
+            pk=from_global_id(contract)[1])
+        cost_object = Cost.objects.get(pk=from_global_id(cost)[1])
+        insured_contract = TheCostOfInsuredContract.objects.filter(
+            insured_contract__insured=insured_object,
+            insured_contract__contract=contract_object, cost=cost_object).first()
         # try to create a paziresh and catch errors in a message
         try:
-            paziresh = Paziresh.objects.create(
-                bimeshavande_gharardad_hazine=bime_shavande_gharardad,
+            reception = Reception.objects.create(
+                the_cost_of_insured_contract=insured_contract,
                 date=date,
-                hazine_darkhasti=hazine_darkhasti,
+                requested_cost=requested_cost,
                 shomare_nezam_pezeshki=shomare_nezam_pezeshki,
                 markaz_darmani=markaz_darmani)
             # if there is a file, save it
             if files:
                 for file in files:
-                    PazireshFile.objects.create(
-                        paziresh=paziresh, file=file)
+                    ReceptionFile.objects.create(
+                        reception=reception, file=file)
             success = True
             error = ''
         except Exception as e:
             success = False
-            paziresh = None
+            reception = None
             error = str(e)
-        paziresh.create_file()
-        return CreatePazireshMutation(success=success, paziresh=paziresh, error=error)
+        reception.create_file()
+        return CreateReceptionMutation(success=success, reception=reception, error=error)
 
 
-class EditPazireshMutation(graphene.Mutation):
+class EditReceptionMutation(graphene.Mutation):
     class Arguments:
         id = graphene.ID()
-        hazine_darkhasti = graphene.Int()
-        hazine = graphene.ID()
-        hazine_taeidi = graphene.Int()
-        bime_paye = graphene.Boolean()
-        arzyab_message = graphene.String()
+        requested_cost = graphene.Int()
+        cost = graphene.ID()
+        verification_cost = graphene.Int()
+        basic_insurance = graphene.Boolean()
+        valuator_message = graphene.String()
         profile_type = graphene.String()
         profile_id = graphene.ID()
         status = graphene.Boolean()
-        eslah = graphene.Boolean()
+        edit = graphene.Boolean() # eslah
 
     success = graphene.Boolean()
-    paziresh = graphene.Field(PazireshNode)
+    reception = graphene.Field(ReceptionNode)
 
     @classmethod
-    def mutate(cls, root, info, status, id, hazine_darkhasti, hazine, hazine_taeidi, bime_paye, arzyab_message,
-               profile_type, profile_id, eslah, **kwargs):
-        paziresh = Paziresh.objects.get(pk=from_global_id(id)[1])
-        if not paziresh.bimeshavande_gharardad_hazine.hazine.id == from_global_id(hazine)[1]:
-            paziresh.bimeshavande_gharardad_hazine.hazine.id = from_global_id(hazine)[
+    def mutate(cls, root, info, status, id, requested_cost, cost, verification_cost, basic_insurance, valuator_message,
+               profile_type, profile_id, edit, **kwargs):
+        reception = Reception.objects.get(pk=from_global_id(id)[1])
+        if not reception.the_cost_of_insured_contract.cost.id == from_global_id(cost)[1]:
+            reception.the_cost_of_insured_contract.cost.id = from_global_id(cost)[
                 1]
         if status:
-            paziresh.hazine_darkhasti = hazine_darkhasti
-            paziresh.hazine_taeidi = hazine_taeidi
-            paziresh.bime_paye = bime_paye
-            paziresh.arzyab_message = arzyab_message
-            if profile_type == "karshenas":
-                paziresh.status = "waitforarzyab"
-                paziresh.karshenas = User.objects.get(
+            reception.requested_cost = requested_cost
+            reception.verification_cost = verification_cost
+            reception.basic_insurance = basic_insurance
+            reception.valuator_message = valuator_message
+            if profile_type == "expert":
+                reception.status = "awaiting valuator approval"
+                reception.expert = User.objects.get(
                     pk=from_global_id(profile_id)[1])
             else:
-                last_status = paziresh.status
-                paziresh.status = "accepted"
-                paziresh.arzyab = User.objects.get(
+                last_status = reception.status
+                reception.status = "accepted"
+                reception.valuator = User.objects.get(
                     pk=from_global_id(profile_id)[1])
-                if last_status != "accepted" and paziresh.bimeshavande_gharardad_hazine.personal_saghf > -1:
-                    paziresh.bimeshavande_gharardad_hazine.personal_saghf = paziresh.bimeshavande_gharardad_hazine.personal_saghf - hazine_taeidi
-                    paziresh.bimeshavande_gharardad_hazine.save()
+                if last_status != "accepted" and reception.the_cost_of_insured_contract.personal_contractـceiling > -1:
+                    reception.the_cost_of_insured_contract.personal_contractـceiling = reception.the_cost_of_insured_contract.personal_contractـceiling - verification_cost
+                    reception.the_cost_of_insured_contract.save()
         else:
-            last_status = paziresh.status
-            paziresh.status = 'rejected'
-            if last_status == 'accepted' and paziresh.bimeshavande_gharardad_hazine.personal_saghf > -1:
-                paziresh.bimeshavande_gharardad_hazine.personal_saghf = paziresh.bimeshavande_gharardad_hazine.personal_saghf + hazine_taeidi
-                paziresh.bimeshavande_gharardad_hazine.save()
-            paziresh.arzyab_message = arzyab_message
-            if profile_type == "karshenas":
-                paziresh.karshenas = User.objects.get(
+            last_status = reception.status
+            reception.status = 'rejected'
+            if last_status == 'accepted' and reception.the_cost_of_insured_contract.personal_contractـceiling > -1:
+                reception.the_cost_of_insured_contract.personal_contractـceiling = reception.the_cost_of_insured_contract.personal_contractـceiling + verification_cost
+                reception.the_cost_of_insured_contract.save()
+            reception.valuator_message = valuator_message
+            if profile_type == "expert":
+                reception.expert = User.objects.get(
                     pk=from_global_id(profile_id)[1])
             else:
-                paziresh.arzyab = User.objects.get(
+                reception.valuator = User.objects.get(
                     pk=from_global_id(profile_id)[1])
-        paziresh.save()
-        if eslah:
-            paziresh.status = 'waitforkarshenas'
-            paziresh.save()
-        return EditPazireshMutation(success=True, paziresh=paziresh)
+        reception.save()
+        if edit:
+            reception.status = 'awaiting expert approval'
+            reception.save()
+        return EditReceptionMutation(success=True, reception=reception)
 
 
-class DeletePazireshMutation(graphene.Mutation):
+class DeleteReceptionMutation(graphene.Mutation):
     class Arguments:
         id = graphene.ID()
 
@@ -328,9 +328,9 @@ class DeletePazireshMutation(graphene.Mutation):
 
     @classmethod
     def mutate(cls, root, info, id, **kwargs):
-        paziresh = Paziresh.objects.get(pk=from_global_id(id)[1])
-        paziresh.delete()
-        return DeletePazireshMutation(success=True)
+        reception = Reception.objects.get(pk=from_global_id(id)[1])
+        reception.delete()
+        return DeleteReceptionMutation(success=True)
 
 
 class ChangePasswordMutation(graphene.Mutation):
@@ -359,5 +359,5 @@ class UploadTest(graphene.Mutation):
     @classmethod
     def mutate(cls, root, info, files):
         for file in files:
-            PazireshFile.objects.create(file=file, paziresh_id=1)
+            ReceptionFile.objects.create(file=file, reception_id=1)
         return UploadTest(status=True)

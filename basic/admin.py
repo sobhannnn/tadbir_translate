@@ -31,7 +31,7 @@ class CustomUserAdmin(UserAdmin):
     list_display = ['id', 'username', 'melli_code', 'first_name', 'last_name']
 
 
-admin.site.register(HazineCategory, MPTTModelAdmin)
+admin.site.register(CostCategory, MPTTModelAdmin)
 admin.site.register(User, CustomUserAdmin)
 models = apps.get_models()
 

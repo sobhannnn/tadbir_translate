@@ -13,27 +13,27 @@ class Role(models.Model):
   The Role entries are managed by the system,
   automatically created via a Django data migration.
   '''
-    BIMESHAVANDE = 1
-    BIMEGOZAR = 2
-    KARSHENAS = 3
-    ARZYAB = 4
+    INSURED = 1                # BIMESHAVANDE
+    POLICYHOLDER = 2           # BIMEGOZAR 
+    EXPERT = 3                 # KARSHENAS
+    VALUATOR = 4               # ARZYAB
     ADMIN = 5
     ROLE_CHOICES = (
-        (BIMESHAVANDE, 'bimeshavande'),
-        (BIMEGOZAR, 'bimegozar'),
-        (KARSHENAS, 'karshenas'),
-        (ARZYAB, 'arzyab'),
+        (INSURED, 'insured'),
+        (POLICYHOLDER, 'policyholder'),
+        (EXPERT, 'expert'),
+        (VALUATOR, 'valuator'),
         (ADMIN, 'admin'),
     )
     ROLE_NAMES = (
-        ("bimeshavande", 'bimeshavande'),
-        ("bimegozar", 'bimegozar'),
-        ("karshenas", 'karshenas'),
-        ("arzyab", 'arzyab'),
+        ("insured", 'insured'),
+        ("policyholder", 'policyholder'),
+        ("expert", 'expert'),
+        ("valuator", 'valuator'),
         ("admin", 'admin'),
     )
     id = models.PositiveSmallIntegerField(choices=ROLE_CHOICES, primary_key=True)
-    name = models.CharField(choices=ROLE_NAMES, default='bimeshavande', max_length=20)
+    name = models.CharField(choices=ROLE_NAMES, default='insured', max_length=20)
 
     def __str__(self):
         return self.get_id_display()
@@ -49,7 +49,7 @@ class User(AbstractUser):
 
 
 # Create your models here.
-class BimeGozar(models.Model):
+class PolicyHolder(models.Model):  # BimeGozar
     name = models.CharField(max_length=100)
     code = models.IntegerField(blank=True, null=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -57,7 +57,7 @@ class BimeGozar(models.Model):
     user = models.OneToOneField(User, on_delete=models.SET_NULL, blank=True, null=True)
 
 
-class BimeGar(models.Model):
+class Insurer(models.Model):   # BimeGar
     name = models.CharField(max_length=100)
     code = models.IntegerField(blank=True, null=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -65,7 +65,7 @@ class BimeGar(models.Model):
     user = models.OneToOneField(User, on_delete=models.SET_NULL, blank=True, null=True)
 
 
-class HazineCategory(MPTTModel):
+class CostCategory(MPTTModel):   #HazineCategory
     name = models.CharField(max_length=50, unique=True)
     code = models.IntegerField(blank=True, null=True)
     parent = TreeForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='children')
@@ -73,94 +73,94 @@ class HazineCategory(MPTTModel):
     created_at = models.DateTimeField(auto_now_add=True)
 
 
-class Hazine(models.Model):
+class Cost(models.Model):   # Hazine
     name = models.CharField(max_length=100)
     code = models.IntegerField(blank=True, null=True)
-    category = models.ForeignKey(HazineCategory, on_delete=models.CASCADE)
-    madarek = models.TextField(blank=True, null=True)
+    category = models.ForeignKey(CostCategory, on_delete=models.CASCADE)
+    documents = models.TextField(blank=True, null=True)   # madarek
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
 
-class Gharardad(models.Model):
+class Contract(models.Model):   # Gharardad
     name = models.CharField(max_length=100)
     code = models.IntegerField(blank=True, null=True)
-    bimegar = models.ForeignKey(BimeGar, on_delete=models.CASCADE)
-    bimegozar = models.ForeignKey(BimeGozar, on_delete=models.CASCADE)
+    insurer = models.ForeignKey(Insurer, on_delete=models.CASCADE)   # bimegar
+    policy_holder = models.ForeignKey(PolicyHolder, on_delete=models.CASCADE)   # bimegozar
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    gharardad_hazines = models.ManyToManyField(Hazine, through='HazineGharardad')
+    contract_costs = models.ManyToManyField(Cost, through='ContractCost')   # gharardad_hazines   #'HazineGharardad'
     file = models.FileField()
     expire_date = models.DateField()
 
 
-class HazineGharardad(models.Model):
-    gharardad = models.ForeignKey(Gharardad, on_delete=models.CASCADE)
-    hazine = models.ForeignKey(Hazine, on_delete=models.CASCADE)
-    saghf = models.BigIntegerField()
-    madarek = models.TextField(max_length=5000, blank=True, null=True)
+class ContractCost(models.Model):   # HazineGharardad
+    contract = models.ForeignKey(Contract, on_delete=models.CASCADE)   # gharardad
+    cost = models.ForeignKey(Cost, on_delete=models.CASCADE)   # hazine
+    contractـceiling = models.BigIntegerField()   # saghf
+    documents = models.TextField(max_length=5000, blank=True, null=True)   # madarek
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
 
-class BimeShavanadeGharardad(models.Model):
-    gharardad = models.ForeignKey(Gharardad, on_delete=models.CASCADE)
-    bimeshavande = models.OneToOneField(User, on_delete=models.CASCADE)
+class InsuredContract(models.Model):   # BimeShavanadeGharardad
+    contract = models.ForeignKey(Contract, on_delete=models.CASCADE)   # gharardad
+    insured = models.OneToOneField(User, on_delete=models.CASCADE)   # bimeshavande
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
 
-class BimeShavandeGharardadHazine(models.Model):
-    bimeshavande_gharardad = models.ForeignKey(BimeShavanadeGharardad, on_delete=models.CASCADE)
-    hazine = models.ForeignKey(Hazine, on_delete=models.CASCADE)
-    personal_saghf = models.BigIntegerField()
+class TheCostOfInsuredContract(models.Model):   # BimeShavandeGharardadHazine
+    insured_contract = models.ForeignKey(InsuredContract, on_delete=models.CASCADE) # bime shavande gharardad
+    cost = models.ForeignKey(Cost, on_delete=models.CASCADE)  # hazine
+    personal_contractـceiling = models.BigIntegerField()  # saghf e shakhsi
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
 
-@receiver(post_save, sender=BimeShavanadeGharardad)
-def bime_shavande_gharardad_handler(sender, instance, created, **kwargs):
+@receiver(post_save, sender=InsuredContract)
+def insured_contract_handler(sender, instance, created, **kwargs):  # bime shavande gharardad handler
     if created:
-        hazines = instance.gharardad.gharardad_hazines.all()
-        for hazine in hazines:
-            gharardad_hazine = HazineGharardad.objects.filter(gharardad=instance.gharardad, hazine=hazine).first()
-            if gharardad_hazine:
-                BimeShavandeGharardadHazine.objects.create(bimeshavande_gharardad=instance, hazine=hazine,
-                                                           personal_saghf=gharardad_hazine.saghf)
+        costs = instance.contract.contract_costs.all()
+        for cost in costs:
+            contract_cost = ContractCost.objects.filter(contract=instance.contract, cost=cost).first()
+            if contract_cost:
+                TheCostOfInsuredContract.objects.create(insured_contract=instance, cost=cost,
+                                                           personal_contract_ceiling=contract_cost.contract_ceiling)
 
 
-@receiver(post_save, sender=HazineGharardad)
-def hazine_gharardad_handler(sender, instance, created, **kwargs):
-    hazine_gharardads = BimeShavandeGharardadHazine.objects.filter(hazine=instance.hazine).all()
-    for hazine_gharardad in hazine_gharardads:
-        hazine_gharardad.personal_saghf = instance.saghf
-        hazine_gharardad.save()
+@receiver(post_save, sender=ContractCost)
+def contract_cost_handler(sender, instance, created, **kwargs):
+    contract_costs = TheCostOfInsuredContract.objects.filter(cost=instance.cost).all()
+    for contract_cost in contract_costs:
+        contract_cost.personal_contract_ceiling = instance.contract_ceiling
+        contract_cost.save()
 
 
-class Paziresh(models.Model):
-    bimeshavande_gharardad_hazine = models.ForeignKey(BimeShavandeGharardadHazine, on_delete=models.CASCADE)
+class Reception(models.Model):  # Paziresh
+    the_cost_of_insured_contract = models.ForeignKey(TheCostOfInsuredContract, on_delete=models.CASCADE)  # bime shavande gharardad hazine
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
     date = models.DateField()
-    hazine_darkhasti = models.BigIntegerField()
-    hazine_taeidi = models.BigIntegerField(default=0)
-    bime_paye = models.BooleanField(default=False)
-    karshenas = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True, null=True, related_name="karshenas")
-    arzyab = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True, null=True, related_name="arzyab")
-    shomare_nezam_pezeshki = models.CharField(max_length=100, blank=True, null=True)
-    markaz_darmani = models.CharField(max_length=50, blank=True, null=True)
+    requested_cost = models.BigIntegerField()   # hazine_darkhasti
+    verification_cost = models.BigIntegerField(default=0)   #hazine_taeidi
+    basic_insurance = models.BooleanField(default=False)   # bime_paye
+    expert = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True, null=True, related_name="expert")   # karshenas
+    valuator = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True, null=True, related_name="valuator")   # arzyab
+    shomare_nezam_pezeshki = models.CharField(max_length=100, blank=True, null=True)   # ???
+    markaz_darmani = models.CharField(max_length=50, blank=True, null=True)   # ???
     file = models.FileField(blank=True, null=True)
     STATUS = [
-        ("waitforkarshenas", "در انتظار تایید کارشناس"),
-        ("waitforarzyab", "در انتظار تایید ارزیاب"),
+        ("awaiting expert approval", "در انتظار تایید کارشناس"),
+        ("awaiting valuator approval", "در انتظار تایید ارزیاب"),
         ("accepted", "تایید برای پرداخت"),
         ("rejected", "عودت")
     ]
     status = models.CharField(choices=STATUS, max_length=20, default="waitforkarshenas")
-    arzyab_message = models.TextField(blank=True, null=True)
+    valuator_message = models.TextField(blank=True, null=True)   # payam arzyab
 
     def create_file(self):
-        images = self.pazireshfile_set.all()
+        images = self.receptionfile_set.all()
         pdf_image_list = [{"image": img.file.path} for img in images]
         with open('media/' + str(self.id) + '.pdf', 'wb') as f:
             build_pdf({"sections": [{"content": pdf_image_list}]}, f)
@@ -169,8 +169,8 @@ class Paziresh(models.Model):
         self.save()
 
 
-class PazireshFile(models.Model):
+class ReceptionFile(models.Model):   # file paziresh
     file = models.FileField()
-    paziresh = models.ForeignKey(Paziresh, on_delete=models.CASCADE)
+    reception = models.ForeignKey(Reception, on_delete=models.CASCADE)   # paziresh
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
